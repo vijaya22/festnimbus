@@ -1,33 +1,31 @@
 package com.appteam.nimbus;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 
-public class homeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class homeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 private PersonalData personalData;
 private ImageLoader imageLoader;
+    private  static final String SHOW_OPTION="show";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        personalData=new PersonalData(this);
+     personalData=new PersonalData(this);
         if(personalData.getStatus()==false){
             Intent i=new Intent(homeActivity.this,Login.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -35,67 +33,53 @@ private ImageLoader imageLoader;
             startActivity(i);
             finish();
         }
+
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-        imageLoader=MySingleton.getInstance(MyApplication.getAppContext()).getImageLoader();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        setDetail(navigationView);
 
         findViewById(R.id.department).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(homeActivity.this,DepartmentalTeam.class));
-                overridePendingTransition(R.anim.open_next,R.anim.open_main);
+                startActivity(new Intent(homeActivity.this, DepartmentalTeam.class));
+                overridePendingTransition(R.anim.open_next, R.anim.open_main);
             }
         });
+
+        findViewById(R.id.coreteam).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(homeActivity.this,CoreTeamActivity.class));
+                overridePendingTransition(R.anim.open_next, R.anim.open_main);
+            }
+        });
+
         findViewById(R.id.event).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(homeActivity.this,teamEvent.class));
-                overridePendingTransition(R.anim.open_next,R.anim.open_main);
+                startActivity(new Intent(homeActivity.this,EventActivity.class));
+                overridePendingTransition(R.anim.open_next, R.anim.open_main);
             }
         });
-    }
-
-    private void setDetail(NavigationView navigationView) {
-        View v=navigationView.getHeaderView(0);
-        TextView textEmail= (TextView) v.findViewById(R.id.textView);
-        textEmail.setText(personalData.getEMAIL());
-        TextView textName= (TextView) v.findViewById(R.id.name_text);
-        ImageView image= (ImageView) v.findViewById(R.id.imageView);
-        textName.setText(personalData.getNAME());
-        String url=personalData.getURL();
-        loadimage(url.substring(0,url.length()-2)+""+(int)Utils.convertDpToPixel(50f,MyApplication.getAppContext()),image);
-
-    }
-
-    private void loadimage(String url, final ImageView image) {
-        imageLoader.get(url, new ImageLoader.ImageListener() {
+        findViewById(R.id.welcome).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                setRounded(response.getBitmap(),image);
-            }
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
+            public void onClick(View view) {
+                Intent intent=new Intent(homeActivity.this,AboutNimbusSplash.class);
+                intent.putExtra(SHOW_OPTION,true);
+                startActivity(intent);
+                overridePendingTransition(R.anim.open_next, R.anim.open_main);
             }
         });
-    }
-
-    private void setRounded(Bitmap bitmap,ImageView image) {
-        RoundedBitmapDrawable bitmapDrawable= RoundedBitmapDrawableFactory.create(homeActivity.this.getResources(),bitmap);
-        bitmapDrawable.setCircular(true);
-        image.setImageDrawable(bitmapDrawable);
     }
 
     @Override
@@ -123,7 +107,17 @@ private ImageLoader imageLoader;
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+            personalData.SaveData(false);
+
+            Intent launch_logout=new Intent(homeActivity.this,Login.class);
+            launch_logout.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            launch_logout.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            launch_logout.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+            startActivity(launch_logout);
+            finish();
+
             return true;
         }
 
@@ -136,22 +130,28 @@ private ImageLoader imageLoader;
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.navigation_to_profile) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+            Intent i=new Intent(homeActivity.this,Profile.class);
 
-        } else if (id == R.id.nav_slideshow) {
+            Log.v("gdsga","gfgrrrr");
+            startActivity(i);
 
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        }else if(id==R.id.aboutus_nav){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(String.format("%1$s", getString(R.string.app_name)));
+            builder.setMessage(getResources().getText(R.string.aboutus_text));
+            builder.setPositiveButton("OK", null);
+            builder.setIcon(R.mipmap.ic_launcher);
+            AlertDialog welcomeAlert = builder.create();
+            welcomeAlert.show();
+            ((TextView) welcomeAlert.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 }
+
